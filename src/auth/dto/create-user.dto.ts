@@ -11,10 +11,9 @@ export class CreateUserDto {
     @MaxLength(20)
     @Matches(
         /(?:(?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
-        message: 'La contraseña debe tener al menos una mayúscula, una minúscula y un número o símbolo',
+        message: 'La contraseña debe tener al menos una mayúscula, una minúscula y un número',
     })
     password: string;
-
 
     @IsString()
     @MinLength(1)
