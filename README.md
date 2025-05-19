@@ -13,7 +13,7 @@
 
 6. Levantar el Backend: ```npm start```
 
-7. Ejecutar SEED (Aun no esta listo)
+7. Ejecutar SEED (para llenar resetear y llenar la bd)
 ```
 localhost:3000/api/seed
 ```

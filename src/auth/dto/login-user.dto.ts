@@ -13,7 +13,7 @@ export class LoginUserDto {
     email: string;
     
     @ApiProperty({
-        description: 'Password del usuario, debe tener al menos una mayúscula, una minúscula y un número',
+        description: 'Contraseña del usuario, debe tener al menos una mayúscula, una minúscula y un número',
         nullable: false,
         minLength: 1
     })
