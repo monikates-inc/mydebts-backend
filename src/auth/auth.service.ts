@@ -6,6 +6,8 @@ import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { log } from 'console';
 import { LoginUserDto } from './dto/login-user.dto';
+import { JwtService } from '@nestjs/jwt';
+import { JwtPayload } from './interfaces/jwt-payload.interface';
 
 
 @Injectable()
@@ -14,6 +16,7 @@ export class AuthService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly jwtService: JwtService,
   ) {
 
   }
@@ -32,6 +35,7 @@ export class AuthService {
 
       return {
         ...user,
+        token: this.getJwt({id: user.id})
       };
 
     } catch (error) {
@@ -57,13 +61,21 @@ export class AuthService {
     delete user.password;
     return {
       ...user,
+      token: this.getJwt({id: user.id})
     };
+  }
+
+  private getJwt(payload: JwtPayload) {
+
+    const token = this.jwtService.sign( payload );
+
+    return token;
   }
 
   private handleDBErrors( error: any ): never {
     if ( error.code === '23505')
       throw new BadRequestException( error.detail);
     log(error);
-    throw new InternalServerErrorException('Revisar server logs');
+    throw new InternalServerErrorException('Check server logs');
   }
 }
