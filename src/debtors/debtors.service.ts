@@ -89,4 +89,17 @@ export class DebtorsService {
 
     throw new InternalServerErrorException('Unexpected Error, check server logs')
   }
+
+  async deleteAllDebtors() {
+    const query = this.debtorRepository.createQueryBuilder('debtor');
+
+    try {
+      return await query
+        .delete()
+        .where({})
+        .execute();
+    } catch (error) {
+      this.handleExceptions(error)
+    }
+  }
 }
