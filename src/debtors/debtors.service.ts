@@ -1,10 +1,11 @@
 import { BadRequestException, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
-import { CreateDebtorDto } from './dto/create-debtor.dto';
-import { UpdateDebtorDto } from './dto/update-debtor.dto';
+import { CreateDebtorDto } from './dtos/create-debtor.dto';
+import { UpdateDebtorDto } from './dtos/update-debtor.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Debtor } from './entities/debtor.entity';
 import { Repository } from 'typeorm';
 import { User } from 'src/auth/entities/user.entity';
+import { PaginationDto } from 'src/common/dtos/pagination.dto';
 
 @Injectable()
 export class DebtorsService {
@@ -42,8 +43,29 @@ export class DebtorsService {
     }
   }
 
-  findAll() {
-    return `This action returns all debtors`;
+    async findAllByUser(paginationDto: PaginationDto, user: User) {
+
+      const {limit = 2, offset = 0} = paginationDto
+
+      const debtors = await this.debtorRepository.find({
+      where: {
+        user: { id: user.id } // Filtra por ID de usuario
+      },
+      relations: ['user'], // Opcional: incluye los datos del usuario
+      take: limit,
+      skip: offset,
+      order: {
+        name: 'ASC' // Orden opcional
+      }
+    });
+
+    return debtors.map(debtor => {
+      // Opcional: transforma la respuesta para eliminar datos sensibles
+      const { user, ...debtorData } = debtor;
+      return {
+        ...debtorData,
+      };
+    });
   }
 
   findOne(id: number) {

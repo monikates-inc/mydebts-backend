@@ -6,6 +6,7 @@ import { Debtor } from 'src/debtors/entities/debtor.entity';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 
+//TODO: Arreglar el seed
 @Injectable()
 export class SeedService {
     constructor(
@@ -21,58 +22,86 @@ export class SeedService {
         const users = await this.insertUsers();
         await this.insertDebtors(users);
         
+        // Verificación adicional
+        await this.validateSeed(users);
+        
         return {
-        message: 'SEED EXECUTED',
-        usersCreated: users.length,
-        debtorsCreated: initialData.debtors.length
+            message: 'SEED EXECUTED SUCCESSFULLY',
+            usersCreated: users.length,
+            debtorsCreated: initialData.debtors.length
         };
     }
 
     private async deleteTables() {
-        // Primero borramos debtors por la relación FK
         await this.debtorRepository.createQueryBuilder()
-        .delete()
-        .where({})
-        .execute();
-        
-        // Luego borramos users
+            .delete()
+            .where({})
+            .execute();
+            
         await this.userRepository.createQueryBuilder()
-        .delete()
-        .where({})
-        .execute();
+            .delete()
+            .where({})
+            .execute();
     }
 
     private async insertUsers() {
-        const seedUsers = initialData.users.map(user => ({
-        ...user,
-        password: bcrypt.hashSync(user.password, 10) 
-        }));
-
-        const users = await this.userRepository.save(
-        seedUsers.map(user => this.userRepository.create(user))
-        );
-
-        return users;
-    }
-
-    private async insertDebtors(users: User[]) {
-
-        const userEmailMap = new Map<string, User>();
-        users.forEach(user => {
-            userEmailMap.set(user.email, user);
-        });
-
-        const debtorsToInsert = initialData.debtors.map(debtor => {
-            const user = userEmailMap.get(debtor.userEmail);
-            if (!user) {
-                throw new Error(`No se encontró usuario con email: ${debtor.userEmail}`);
-            }
-            return this.debtorRepository.create({
-                ...debtor,
-                user // Asignamos el objeto User completo
+        // Hasheo asíncrono con verificación
+        const userCreationPromises = initialData.users.map(async user => {
+            const hashedPassword = await bcrypt.hash(user.password, 10);
+            return this.userRepository.create({
+                ...user,
+                password: hashedPassword
             });
         });
 
-        await this.debtorRepository.save(debtorsToInsert);
+        const usersToSave = await Promise.all(userCreationPromises);
+        return await this.userRepository.save(usersToSave);
+    }
+
+    private async insertDebtors(users: User[]) {
+        const userEmailMap = new Map<string, User>();
+        users.forEach(user => userEmailMap.set(user.email, user));
+
+        const debtorCreationPromises = initialData.debtors.map(async debtor => {
+            const user = userEmailMap.get(debtor.userEmail);
+            if (!user) throw new Error(`User with email ${debtor.userEmail} not found`);
+            
+            return this.debtorRepository.create({
+                ...debtor,
+                user
+            });
+        });
+
+        const debtorsToSave = await Promise.all(debtorCreationPromises);
+        await this.debtorRepository.save(debtorsToSave);
+    }
+
+    private async validateSeed(users: User[]) {
+        // Verifica que las contraseñas coincidan
+        for (const user of users) {
+            const originalUserData = initialData.users.find(u => u.email === user.email);
+            if (!originalUserData) continue;
+            
+            const isValid = await bcrypt.compare(originalUserData.password, user.password);
+            if (!isValid) {
+                throw new Error(`Password verification failed for user ${user.email}`);
+            }
+        }
+        
+        // Verifica las relaciones
+        for (const debtorData of initialData.debtors) {
+            const exists = await this.debtorRepository.findOne({
+                where: { 
+                    name: debtorData.name,
+                    lastname: debtorData.lastname,
+                    user: { email: debtorData.userEmail }
+                },
+                relations: ['user']
+            });
+            
+            if (!exists) {
+                throw new Error(`Debtor ${debtorData.name} ${debtorData.lastname} not properly created`);
+            }
+        }
     }
 }

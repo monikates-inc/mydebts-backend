@@ -1,10 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { DebtorsService } from './debtors.service';
-import { CreateDebtorDto } from './dto/create-debtor.dto';
-import { UpdateDebtorDto } from './dto/update-debtor.dto';
+import { CreateDebtorDto } from './dtos/create-debtor.dto';
+import { UpdateDebtorDto } from './dtos/update-debtor.dto';
 import { GetUser } from 'src/auth/decorators/get-user.decorator';
 import { User } from 'src/auth/entities/user.entity';
 import { Auth } from 'src/auth/decorators/auth.decorator';
+import { PaginationDto } from 'src/common/dtos/pagination.dto';
 
 @Controller('debtors')
 export class DebtorsController {
@@ -20,8 +21,12 @@ export class DebtorsController {
   }
 
   @Get()
-  findAll() {
-    return this.debtorsService.findAll();
+  @Auth()
+  findAll(
+    @Query() paginationDto: PaginationDto,
+    @GetUser() user: User,
+  ) {
+    return this.debtorsService.findAllByUser(paginationDto, user);
   }
 
   @Get(':id')

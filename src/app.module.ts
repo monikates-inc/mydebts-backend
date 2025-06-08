@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { SeedModule } from './seed/seed.module';
 import { DebtorsModule } from './debtors/debtors.module';
+import { CommonModule } from './common/common.module';
 
 
 @Module({
@@ -28,6 +29,7 @@ import { DebtorsModule } from './debtors/debtors.module';
     AuthModule,
     SeedModule,
     DebtorsModule,
+    CommonModule,
   ],
 
   

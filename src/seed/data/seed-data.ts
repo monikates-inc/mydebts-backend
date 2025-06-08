@@ -62,5 +62,10 @@ export const initialData: SeedData = {
             phone: "+56912345678",
             userEmail: 'seba.naranjo@gmail.com'
         },
+        {
+            name: "Pablo",
+            lastname: "Salvo",
+            userEmail: 'enzo.troncoso@gmail.com'
+        },
     ]
 }
