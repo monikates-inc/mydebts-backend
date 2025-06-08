@@ -1,4 +1,5 @@
-import { BeforeInsert, Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Debtor } from "src/debtors/entities/debtor.entity";
+import { BeforeInsert, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({name: 'users'})
 export class User {
@@ -28,6 +29,9 @@ export class User {
         default: true
     })
     isActive: boolean;
+
+    @OneToMany(() => Debtor, debtor => debtor.user)
+    debtors: Debtor[];
 
     @BeforeInsert()
     checkFieldsBeforeInsert() {
