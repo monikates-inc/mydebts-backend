@@ -6,6 +6,7 @@ import { Debtor } from './entities/debtor.entity';
 import { Repository } from 'typeorm';
 import { User } from 'src/auth/entities/user.entity';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
+import { Debt } from 'src/debts/entities/debt.entity';
 
 @Injectable()
 export class DebtorsService {
@@ -18,67 +19,49 @@ export class DebtorsService {
   ) {}
 
 
+  async findAllByUser(paginationDto: PaginationDto, user: User) {
 
-  async create(createDebtorDto: CreateDebtorDto, user: User) {
-    
-    try {
-      const debtor = this.debtorRepository.create({
-        ...createDebtorDto,
-        user
+    const {limit = 10, offset = 0} = paginationDto
+
+    try {     
+      const debtors = await this.debtorRepository.find({
+        where: {
+          user: { id: user.id }, // Filtra por ID de usuario
+        },
+        relations: ['debts'], // Carga las deudas relacionadas
+        take: limit,
+        skip: offset,
+        order: {
+          name: 'ASC' // Orden opcional
+        }
       });
-      
-      const savedDebtor = await this.debtorRepository.save(debtor);
 
-      // Respuesta limpia sin información sensible
-      return {
-        id: savedDebtor.id,
-        name: savedDebtor.name,
-        lastname: savedDebtor.lastname,
-        phone: savedDebtor.phone,
-        email: savedDebtor.email,
-        userId: user.id,
-      };
+      return debtors.map(({ debts, user, ...debtorData }) => {
+        const totalMount = debts
+        ?.filter(debt => !debt.paid)        // solo deudas no pagadas
+        .reduce((sum, debt) => sum + debt.mount, 0) ?? 0;
+
+        return {
+          ...debtorData,
+          mount: totalMount,
+        };
+      });
     } catch (error) {
       this.handleExceptions(error);
     }
   }
 
-    async findAllByUser(paginationDto: PaginationDto, user: User) {
+  // findOne(id: number) {
+  //   return `This action returns a #${id} debtor`;
+  // }
 
-      const {limit = 2, offset = 0} = paginationDto
+  // update(id: number, updateDebtorDto: UpdateDebtorDto) {
+  //   return `This action updates a #${id} debtor`;
+  // }
 
-      const debtors = await this.debtorRepository.find({
-      where: {
-        user: { id: user.id } // Filtra por ID de usuario
-      },
-      relations: ['user'], // Opcional: incluye los datos del usuario
-      take: limit,
-      skip: offset,
-      order: {
-        name: 'ASC' // Orden opcional
-      }
-    });
-
-    return debtors.map(debtor => {
-      // Opcional: transforma la respuesta para eliminar datos sensibles
-      const { user, ...debtorData } = debtor;
-      return {
-        ...debtorData,
-      };
-    });
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} debtor`;
-  }
-
-  update(id: number, updateDebtorDto: UpdateDebtorDto) {
-    return `This action updates a #${id} debtor`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} debtor`;
-  }
+  // remove(id: number) {
+  //   return `This action removes a #${id} debtor`;
+  // }
 
   private handleExceptions(error: any) {
 

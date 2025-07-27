@@ -1,5 +1,6 @@
 import { User } from "src/auth/entities/user.entity";
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Debt } from "src/debts/entities/debt.entity";
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({name: 'debtors'})
 export class Debtor {
@@ -28,4 +29,10 @@ export class Debtor {
         ( user ) => user.id,
     )
     user: User;
+
+    @OneToMany(
+        () => Debt, 
+        debt => debt.debtor,
+    )
+    debts: Debt[];
 }

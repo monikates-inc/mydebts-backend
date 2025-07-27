@@ -6,17 +6,22 @@ interface SeedUser {
     lastname: string;
     password: string;
 }
-interface SeedDebtor {
+interface SeedDebt {
     name: string,
     lastname: string,
     phone?: string,
     email?: string,
     userEmail: string;
+    mount: number;
+    description?: string;
 }
+
+
+
 
 interface SeedData {
     users: SeedUser[];
-    debtors: SeedDebtor[];
+    debts: SeedDebt[];
 }
 
 
@@ -42,30 +47,45 @@ export const initialData: SeedData = {
             password: bcrypt.hashSync('Abc123456', 10),
         },
     ],
-    debtors: [
+    debts: [
         {
             name: "Ernesto",
             lastname: "Medina",
             phone: "+56987654321",
             email: "ernesto.medina@example.com",
-            userEmail: 'seba.naranjo@gmail.com'
+            userEmail: 'seba.naranjo@gmail.com',
+            mount: 1000,
+            description: "Deuda por servicios prestados",
         },
+
+        // {
+        //     name: "Ernesto",
+        //     lastname: "Medina",
+        //     phone: "+56987654321",
+        //     email: "ernesto.medina@example.com",
+        //     userEmail: 'seba.naranjo@gmail.com',
+        //     mount: 1000,
+        //     description: "Deuda",
+        // },
 
         {
             name: "Manuel",
             lastname: "Solis",
-            userEmail: 'seba.naranjo@gmail.com'
+            userEmail: 'seba.naranjo@gmail.com',
+            mount: 500,
         },
         {
             name: "Manuel",
             lastname: "Luque",
             phone: "+56912345678",
-            userEmail: 'seba.naranjo@gmail.com'
+            userEmail: 'seba.naranjo@gmail.com',
+            mount: 750,
         },
         {
             name: "Pablo",
             lastname: "Salvo",
-            userEmail: 'enzo.troncoso@gmail.com'
+            userEmail: 'enzo.troncoso@gmail.com',
+            mount: 300,
         },
-    ]
+    ],   
 }

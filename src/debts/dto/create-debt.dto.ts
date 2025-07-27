@@ -1,7 +1,8 @@
 import { IsEmail, IsNumber, IsOptional, IsPositive, IsString, Matches, MinLength } from "class-validator";
 
-export class CreateDebtorDto {
+export class CreateDebtDto {
 
+    // info del deudor
     @IsString()
     @MinLength(1)
     name: string;
@@ -26,4 +27,4 @@ export class CreateDebtorDto {
     @IsNumber()
     @IsPositive()
     mount: number;
-}
+} 

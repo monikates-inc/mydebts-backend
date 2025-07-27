@@ -5,6 +5,7 @@ import { AuthModule } from './auth/auth.module';
 import { SeedModule } from './seed/seed.module';
 import { DebtorsModule } from './debtors/debtors.module';
 import { CommonModule } from './common/common.module';
+import { DebtsModule } from './debts/debts.module';
 
 
 @Module({
@@ -30,6 +31,7 @@ import { CommonModule } from './common/common.module';
     SeedModule,
     DebtorsModule,
     CommonModule,
+    DebtsModule,
   ],
 
   
